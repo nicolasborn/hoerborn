@@ -20,73 +20,87 @@
 #include <AudioShield.h>
 #include <EEPROM.h>
 
+// Variablen fuer Filehandling
 char filename[13];
 int currentFolder = 0;
 int numberOfFiles[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+// Debug Modus (bezieht sich nur auf die Logausgabe
 boolean debug = true;
-int button=-1;
-int previousButtonPressed=-1;
+
+// Variablen fuer Buttonhandling
+int button = -1;
+int previousButtonPressed = -1;
+unsigned long lastButtonEvent;
+
+// Variablen bezueglich pausieren von Songs
+boolean paused = false;
+long filePosition = 0;
+
 
 void setup() {
-   digitalWrite(6, HIGH);
-   Serial.begin(9600);
-   println("Los geht's");
-   //SD-Karte initialisieren
-   if( SD.begin( SD_CS ) == false )
-   {
-     println("Karte fehlt oder ist fehlerhaft");
-     return;
-   }
-   println("Karte initialisiert.");
-   count();
-   //MP3-Decoder initialisieren
-   VS1011.begin();
-   VS1011.SetVolume(10,10);
-   randomSeed(analogRead(0));
+  digitalWrite(6, HIGH);
+  Serial.begin(9600);
+  println("Los geht's");
+  //SD-Karte initialisieren
+  if ( SD.begin( SD_CS ) == false )
+  {
+    println("Karte fehlt oder ist fehlerhaft");
+    return;
+  }
+  println("Karte initialisiert.");
+  count();
+  //MP3-Decoder initialisieren
+  VS1011.begin();
+  VS1011.SetVolume(10, 10);
+  randomSeed(analogRead(0));
 }
 
 void loop() {
-  if (checkAndSetButtonPressed() && button>0 && button<10 && numberOfFiles[button]>0){
+  if (checkAndSetButtonPressed() && button < 10 && numberOfFiles[button] > 0) {
     sprintf(filename, "%d/%02d.mp3", button, 1);
-    println(String(filename) + " " + String(button));
   }
-  
+
   // Puffer für MP3-Decoder anlegen
   // MP3-Decoder erwartet Daten immer in 32 Byte Blöcken
   unsigned char buffer[32];
 
   //Datei öffnen und abspielen
-  if (!SD.exists(filename)){
+  if (!SD.exists(filename) || paused) {
     return;
   }
-  else if (File SoundFile = SD.open(filename)){
+  else if (File SoundFile = SD.open(filename)) {
     LED_BLUE_ON;
 
-    println("Spiele Datei " + String(filename));
+    if (filePosition > 0) {
+      SoundFile.seek(filePosition);
+      println("Spiele Datei " + String(filename) + " weiter ab Position " + String(filePosition));
+      filePosition = 0;
+    } else {
+      println("Spiele Datei " + String(filename));
+    }
 
     VS1011.UnsetMute();
-    while (SoundFile.available()){
+    while (!paused && SoundFile.available()) {
       SoundFile.read(buffer, sizeof(buffer));
       VS1011.Send32(buffer);
-      if (checkAndSetButtonPressed() && button>0 && button<10){
-        sprintf(filename, "%d/%02d.mp3", button, 1);
-        println(String(filename) + " " + String(button));
+      if (checkAndSetButtonPressed() && button < 10) {
+        if (paused && filePosition == 0) {
+          filePosition = SoundFile.position();
+          println("Pausiert an Position " + String(filePosition));
+        } else if (!paused){
+          sprintf(filename, "%d/%02d.mp3", button, 1);
+        }
         break;
       }
     }
-    println("Datei zu Ende");
 
-    //Internen Datenpuffer vom MP3-Decoder mit Nullen füllen
-    //damit sicher alles im Puffer abgespielt wird und Puffer leer ist
-    //MP3-Decoder besitzt 2048 Byte großen Datenpuffer
     VS1011.Send2048Zeros();
-
-    //Verstärker deaktivieren
     VS1011.SetMute();
 
     LED_BLUE_OFF;
   }
-  
+
   // Wartezeit zwischen Durchläufen 500ms
   // delay( 500 );
 }
@@ -114,11 +128,30 @@ int checkButtonPressed() {
 // Gibt true zurueck falls ein neuer Knopf gedrueckt wurde
 boolean checkAndSetButtonPressed() {
   int newButtonPressed = checkButtonPressed();
+  if (newButtonPressed == -1){
+    return false;
+  }
   if (button == newButtonPressed) {
+    if (paused && button <10 && (millis()-lastButtonEvent)>1000){
+      lastButtonEvent = millis();
+      paused = false;
+      return true;
+    }
+    if (!paused && button<10 && (millis()-lastButtonEvent)>1000){
+      
+      lastButtonEvent = millis();
+      paused = true;
+      VS1011.Send2048Zeros();
+      VS1011.SetMute();
+      return true;
+    }
     return false;
   }
   previousButtonPressed = newButtonPressed;
   button = newButtonPressed;
+  lastButtonEvent = millis();
+  paused = false;
+  filePosition = 0;
   return true;
 }
 
@@ -128,20 +161,20 @@ void count() {
   int folder = 1;
   int counter = 1;
   char name[13];
-  while (folder<10){
+  while (folder < 10) {
     counter = 1;
-    while (true){
+    while (true) {
       sprintf(name, "%d/%02d.mp3", folder, counter++);
-      if (!SD.exists(name) || counter>99) {
-        println("Fuer Ordner " + String(folder) + " wurden " + String(counter-2) + " Dateien gefunden.");
-        numberOfFiles[folder++] = counter-2;
+      if (!SD.exists(name) || counter > 99) {
+        println("Fuer Ordner " + String(folder) + " wurden " + String(counter - 2) + " Dateien gefunden.");
+        numberOfFiles[folder++] = counter - 2;
         break;
       }
     }
-  }  
+  }
 }
 
-void println(String logMsg){
+void println(String logMsg) {
   if (!debug) return;
   Serial.println(logMsg);
 }
