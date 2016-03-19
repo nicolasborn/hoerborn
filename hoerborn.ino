@@ -22,7 +22,7 @@
 
 // Variablen fuer Filehandling
 char filename[13];
-int currentFolder = 0;
+int currentFile = 1;
 int numberOfFiles[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 // Debug Modus (bezieht sich nur auf die Logausgabe
@@ -58,11 +58,10 @@ void setup() {
 
 void loop() {
   if (checkAndSetButtonPressed() && button < 10 && numberOfFiles[button] > 0) {
-    sprintf(filename, "%d/%02d.mp3", button, 1);
+    println("Aktuelle Datei " + String(currentFile));
+    sprintf(filename, "%d/%02d.mp3", button, currentFile);
   }
 
-  // Puffer für MP3-Decoder anlegen
-  // MP3-Decoder erwartet Daten immer in 32 Byte Blöcken
   unsigned char buffer[32];
 
   //Datei öffnen und abspielen
@@ -89,7 +88,7 @@ void loop() {
           filePosition = SoundFile.position();
           println("Pausiert an Position " + String(filePosition));
         } else if (!paused){
-          sprintf(filename, "%d/%02d.mp3", button, 1);
+          sprintf(filename, "%d/%02d.mp3", button, currentFile);
         }
         break;
       }
@@ -132,13 +131,12 @@ boolean checkAndSetButtonPressed() {
     return false;
   }
   if (button == newButtonPressed) {
-    if (paused && button <10 && (millis()-lastButtonEvent)>1000){
+    if (paused && (millis()-lastButtonEvent)>1000){
       lastButtonEvent = millis();
       paused = false;
       return true;
     }
-    if (!paused && button<10 && (millis()-lastButtonEvent)>1000){
-      
+    if (!paused && (millis()-lastButtonEvent)>1000){
       lastButtonEvent = millis();
       paused = true;
       VS1011.Send2048Zeros();
@@ -147,11 +145,28 @@ boolean checkAndSetButtonPressed() {
     }
     return false;
   }
+  if (newButtonPressed == 10){
+    if ((millis()-lastButtonEvent)<1000){
+      return false;
+    }
+    currentFile--;
+    paused = false;
+    lastButtonEvent = millis();
+    return true;
+  }
+  if (newButtonPressed == 11){
+    if ((millis()-lastButtonEvent)<1000){
+      return false;
+    }
+    currentFile++;
+    paused = false;
+    lastButtonEvent = millis();
+    return true;
+  }
   previousButtonPressed = newButtonPressed;
   button = newButtonPressed;
+  currentFile = 1;
   lastButtonEvent = millis();
-  paused = false;
-  filePosition = 0;
   return true;
 }
 
