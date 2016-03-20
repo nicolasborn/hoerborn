@@ -22,6 +22,7 @@
 
 // Variablen fuer Filehandling
 char filename[13];
+int currentFolder = -1;
 int currentFile = 1;
 int numberOfFiles[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -37,6 +38,9 @@ unsigned long lastButtonEvent;
 boolean paused = false;
 long filePosition = 0;
 
+// Variablen bezueglich EEPROM
+unsigned long lastEepromEvent;
+
 
 void setup() {
   digitalWrite(6, HIGH);
@@ -49,18 +53,22 @@ void setup() {
     return;
   }
   println("Karte initialisiert.");
+  
   count();
+  
   //MP3-Decoder initialisieren
   VS1011.begin();
-  VS1011.SetVolume(10, 10);
-  randomSeed(analogRead(0));
+  VS1011.SetVolume(30, 30);
+  
+  ladeZuvorAbgespieltenSong();
 }
 
 void loop() {
-  if (checkAndSetButtonPressed() && button < 10 && numberOfFiles[button] > 0) {
-    println("Aktuelle Datei " + String(currentFile));
-    sprintf(filename, "%d/%02d.mp3", button, currentFile);
-  }
+  checkAndSetButtonPressed();
+  if (currentFolder==-1) return;
+  if (paused) return;
+  
+  waehleDatei();
 
   unsigned char buffer[32];
 
@@ -83,25 +91,93 @@ void loop() {
     while (!paused && SoundFile.available()) {
       SoundFile.read(buffer, sizeof(buffer));
       VS1011.Send32(buffer);
-      if (checkAndSetButtonPressed() && button < 10) {
+      if (checkAndSetButtonPressed()) {
         if (paused && filePosition == 0) {
           filePosition = SoundFile.position();
+          VS1011.Send2048Zeros();
+          VS1011.SetMute();
+          speichereLiedUndPositionInEeprom(filePosition);
           println("Pausiert an Position " + String(filePosition));
         } else if (!paused){
-          sprintf(filename, "%d/%02d.mp3", button, currentFile);
+          waehleDatei();
         }
-        break;
+        return;
+      }
+      if (millis()-lastEepromEvent>60000){
+        speichereLiedUndPositionInEeprom(SoundFile.position());
       }
     }
 
     VS1011.Send2048Zeros();
     VS1011.SetMute();
 
+    waehleNaechsteDatei();
+
     LED_BLUE_OFF;
   }
+}
 
-  // Wartezeit zwischen Durchläufen 500ms
-  // delay( 500 );
+// Gibt true zurueck falls ein neuer Knopf gedrueckt wurde
+boolean checkAndSetButtonPressed() {
+  int newButtonPressed = checkButtonPressed();
+  if (newButtonPressed == -1){
+    return false;
+  }
+  printState("neuknopf");
+  if (currentFolder == newButtonPressed) {
+    return pauseUnpause();
+  }
+  paused = false;
+  if (newButtonPressed > 9){
+    return nextPreviousSong(newButtonPressed);
+  }
+  previousButtonPressed = newButtonPressed;
+  button = newButtonPressed;
+  currentFolder = newButtonPressed;
+  currentFile = 1;
+  filePosition = 0;
+  lastButtonEvent = millis();
+  speichereLiedUndPositionInEeprom(0);
+  return true;
+}
+
+// Pausiert den Song oder beendet die Pause,
+// wenn genuegend Zeit zwischen dem letzten Button vergangen ist (mehr als 1 Sekunde)
+// gibt true zurueck falls sich am Pause-Status etwas geaendert hat
+boolean pauseUnpause(){
+  if (millis()-lastButtonEvent<1000){
+    return false; 
+  }
+  printState("pausieren");
+  lastButtonEvent = millis();
+  paused = !paused;
+  return true;
+}
+
+// Waehlt das naechste/letzte Lied oder springt zum naechsten Ordner falls kein Lied mehr im Ordner vorhanden ist
+boolean nextPreviousSong(int newButtonPressed){
+  if (millis()-lastButtonEvent<1000){
+    return false;
+  }
+  if (newButtonPressed == 11){
+    waehleNaechsteDatei();
+  }
+  lastButtonEvent = millis();
+  return true;
+}
+
+void waehleNaechsteDatei(){
+  currentFile++;
+  // Pruefe ob Datei existiert, ansonsten wird die naechste gespeichert.
+  while (true){
+    if (numberOfFiles[currentFolder]>0 && numberOfFiles[currentFolder]>=currentFile){
+      break;
+    }
+    currentFolder = currentFolder==9?1:currentFolder+1;
+    currentFile = 1;
+    button = currentFolder;
+  }
+  speichereLiedUndPositionInEeprom(0);
 }
 
 // Prueft welcher Knopf gedrueckt wurde
@@ -124,51 +200,10 @@ int checkButtonPressed() {
   return -1;
 }
 
-// Gibt true zurueck falls ein neuer Knopf gedrueckt wurde
-boolean checkAndSetButtonPressed() {
-  int newButtonPressed = checkButtonPressed();
-  if (newButtonPressed == -1){
-    return false;
-  }
-  if (button == newButtonPressed) {
-    if (paused && (millis()-lastButtonEvent)>1000){
-      lastButtonEvent = millis();
-      paused = false;
-      return true;
-    }
-    if (!paused && (millis()-lastButtonEvent)>1000){
-      lastButtonEvent = millis();
-      paused = true;
-      VS1011.Send2048Zeros();
-      VS1011.SetMute();
-      return true;
-    }
-    return false;
-  }
-  if (newButtonPressed == 10){
-    if ((millis()-lastButtonEvent)<1000){
-      return false;
-    }
-    currentFile--;
-    paused = false;
-    lastButtonEvent = millis();
-    return true;
-  }
-  if (newButtonPressed == 11){
-    if ((millis()-lastButtonEvent)<1000){
-      return false;
-    }
-    currentFile++;
-    paused = false;
-    lastButtonEvent = millis();
-    return true;
-  }
-  previousButtonPressed = newButtonPressed;
-  button = newButtonPressed;
-  currentFile = 1;
-  lastButtonEvent = millis();
-  return true;
-}
+void waehleDatei(){
+  println("Aktuelle Datei " + String(currentFolder) + "/" + String(currentFile));
+  sprintf(filename, "%d/%02d.mp3", currentFolder, currentFile);
+}  
 
 // Zaehlt die Anzahl der Dateien auf der SD Karte und legt die Anzahl im Array ab
 // Annahme: die Dateien sind in 9 Ordner mit Namen 1-9 abgelegt und sind aufsteigend sortiert (01-99.mp3)
@@ -187,6 +222,66 @@ void count() {
       }
     }
   }
+}
+
+void ladeZuvorAbgespieltenSong(){
+  int folderFromEeprom = EEPROM.read(0);
+  int fileFromEeprom = EEPROM.read(1);
+  
+  if (folderFromEeprom<=0 || fileFromEeprom<=0 || folderFromEeprom>10 || fileFromEeprom>99){
+    return;
+  }
+  currentFolder = folderFromEeprom;
+  currentFile = fileFromEeprom;
+  filePosition = EEPROMReadLong(2);
+}
+
+void speichereLiedUndPositionInEeprom(long filePosition){
+  if (filePosition==0){
+    EEPROM.write(0, currentFolder);
+    EEPROM.write(1, currentFile);
+  }
+  EEPROMWriteLong(2, filePosition);
+  lastEepromEvent = millis();
+}
+
+// laedt einen long aus dem eeprom
+// uebernommen aus http://playground.arduino.cc/Code/EEPROMReadWriteLong
+long EEPROMReadLong(long address){
+  //Read the 4 bytes from the eeprom memory.
+  long four = EEPROM.read(address);
+  long three = EEPROM.read(address + 1);
+  long two = EEPROM.read(address + 2);
+  long one = EEPROM.read(address + 3);
+
+  //Return the recomposed long by using bitshift.
+  return ((four << 0) & 0xFF) + ((three << 8) & 0xFFFF) + ((two << 16) & 0xFFFFFF) + ((one << 24) & 0xFFFFFFFF);
+}
+
+// speichert einen long in dem eeprom
+// uebernommen aus http://playground.arduino.cc/Code/EEPROMReadWriteLong
+void EEPROMWriteLong(int address, long value){
+  // Decomposition from a long to 4 bytes by using bitshift.
+  // One = Most significant -> Four = Least significant byte
+  byte four = (value & 0xFF);
+  byte three = ((value >> 8) & 0xFF);
+  byte two = ((value >> 16) & 0xFF);
+  byte one = ((value >> 24) & 0xFF);
+ 
+  //Write the 4 bytes into the eeprom memory.
+  EEPROM.write(address, four);
+  EEPROM.write(address + 1, three);
+  EEPROM.write(address + 2, two);
+  EEPROM.write(address + 3, one);
+}
+
+// Druckt den aktuellen Zustand fuer Debugzwecke
+void printState(String location){
+  println(location + 
+  " - currentFolder:"+String(currentFolder)+
+  ", button:"+String(button)+
+  ", pause:"+String(paused)+
+  ", time:"+String(millis())+"/"+String(lastButtonEvent));
 }
 
 void println(String logMsg) {
