@@ -21,7 +21,7 @@
 #include <EEPROM.h>
 
 // Variablen fuer Filehandling
-char filename[13];
+char filename[15];
 int currentFolder = -1;
 int currentFile = 1;
 int numberOfFiles[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
@@ -41,11 +41,21 @@ long filePosition = 0;
 // Variablen bezueglich EEPROM
 unsigned long lastEepromEvent;
 
+// Buffer fuer Wiedergabe
+unsigned char buffer[32];
+
 
 void setup() {
   digitalWrite(6, HIGH);
   Serial.begin(9600);
-  println("Los geht's");
+  
+  pinMode(LED_BLUE, OUTPUT);
+  pinMode(LED_RED, OUTPUT);
+  //beide LEDs ausschalten
+  LED_BLUE_OFF;
+  LED_RED_OFF;
+  
+  println("Start Hoerborn");
   //SD-Karte initialisieren
   if ( SD.begin( SD_CS ) == false )
   {
@@ -70,15 +80,14 @@ void loop() {
   
   waehleDatei();
 
-  unsigned char buffer[32];
-
   //Datei öffnen und abspielen
-  if (!SD.exists(filename) || paused) {
+  if (!SD.exists(filename)) {
+    LED_RED_ON;
+    delay(500);
+    LED_RED_OFF;
     return;
   }
   else if (File SoundFile = SD.open(filename)) {
-    LED_BLUE_ON;
-
     if (filePosition > 0) {
       SoundFile.seek(filePosition);
       println("Spiele Datei " + String(filename) + " weiter ab Position " + String(filePosition));
@@ -94,13 +103,12 @@ void loop() {
       if (checkAndSetButtonPressed()) {
         if (paused && filePosition == 0) {
           filePosition = SoundFile.position();
-          VS1011.Send2048Zeros();
-          VS1011.SetMute();
           speichereLiedUndPositionInEeprom(filePosition);
           println("Pausiert an Position " + String(filePosition));
-        } else if (!paused){
-          waehleDatei();
         }
+        VS1011.Send2048Zeros();
+        VS1011.SetMute();
+        SoundFile.close();
         return;
       }
       if (millis()-lastEepromEvent>60000){
@@ -110,10 +118,9 @@ void loop() {
 
     VS1011.Send2048Zeros();
     VS1011.SetMute();
+    SoundFile.close();
 
     waehleNaechsteDatei();
-
-    LED_BLUE_OFF;
   }
 }
 
@@ -123,7 +130,6 @@ boolean checkAndSetButtonPressed() {
   if (newButtonPressed == -1){
     return false;
   }
-  printState("neuknopf");
   if (currentFolder == newButtonPressed) {
     return pauseUnpause();
   }
@@ -148,7 +154,6 @@ boolean pauseUnpause(){
   if (millis()-lastButtonEvent<1000){
     return false; 
   }
-  printState("pausieren");
   lastButtonEvent = millis();
   paused = !paused;
   return true;
@@ -162,6 +167,7 @@ boolean nextPreviousSong(int newButtonPressed){
   if (newButtonPressed == 11){
     waehleNaechsteDatei();
   }
+  filePosition = 0;
   lastButtonEvent = millis();
   return true;
 }
@@ -170,7 +176,7 @@ void waehleNaechsteDatei(){
   currentFile++;
   // Pruefe ob Datei existiert, ansonsten wird die naechste gespeichert.
   while (true){
-    if (numberOfFiles[currentFolder]>0 && numberOfFiles[currentFolder]>=currentFile){
+    if (numberOfFiles[currentFolder-1]>0 && numberOfFiles[currentFolder-1]>=currentFile){
       break;
     }
     currentFolder = currentFolder==9?1:currentFolder+1;
@@ -201,7 +207,6 @@ int checkButtonPressed() {
 }
 
 void waehleDatei(){
-  println("Aktuelle Datei " + String(currentFolder) + "/" + String(currentFile));
   sprintf(filename, "%d/%02d.mp3", currentFolder, currentFile);
 }  
 
@@ -217,7 +222,7 @@ void count() {
       sprintf(name, "%d/%02d.mp3", folder, counter++);
       if (!SD.exists(name) || counter > 99) {
         println("Fuer Ordner " + String(folder) + " wurden " + String(counter - 2) + " Dateien gefunden.");
-        numberOfFiles[folder++] = counter - 2;
+        numberOfFiles[folder++-1] = counter - 2;
         break;
       }
     }
@@ -275,13 +280,14 @@ void EEPROMWriteLong(int address, long value){
   EEPROM.write(address + 3, one);
 }
 
-// Druckt den aktuellen Zustand fuer Debugzwecke
+// Gibt den aktuellen Zustand fuer Debugzwecke aus
 void printState(String location){
   println(location + 
   " - currentFolder:"+String(currentFolder)+
   ", button:"+String(button)+
   ", pause:"+String(paused)+
-  ", time:"+String(millis())+"/"+String(lastButtonEvent));
+  ", time:"+String(millis())+"/"+String(lastButtonEvent)+
+  ", filename:"+String(filename));
 }
 
 void println(String logMsg) {
