@@ -20,11 +20,16 @@
 #include <AudioShield.h>
 #include <EEPROM.h>
 
+// Konstanten
+const int buttonsPin = A5;
+const int volumePin = A4;
+
 // Variablen fuer Filehandling
 char filename[15];
 int currentFolder = -1;
 int currentFile = 1;
 int numberOfFiles[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+
 
 // Debug Modus (bezieht sich nur auf die Logausgabe
 boolean debug = true;
@@ -32,14 +37,16 @@ boolean debug = true;
 // Variablen fuer Buttonhandling
 int button = -1;
 int previousButtonPressed = -1;
-unsigned long lastButtonEvent;
 
 // Variablen bezueglich pausieren von Songs
 boolean paused = false;
 long filePosition = 0;
 
-// Variablen bezueglich EEPROM
+// Timer
+unsigned long lastButtonEvent;
+unsigned long lastVolumeEvent;
 unsigned long lastEepromEvent;
+
 
 // Buffer fuer Wiedergabe
 unsigned char buffer[32];
@@ -55,6 +62,9 @@ void setup() {
   LED_BLUE_OFF;
   LED_RED_OFF;
   
+  pinMode(buttonsPin, INPUT);
+  pinMode(volumePin, INPUT);
+  
   println("Start Hoerborn");
   //SD-Karte initialisieren
   if ( SD.begin( SD_CS ) == false )
@@ -64,11 +74,10 @@ void setup() {
   }
   println("Karte initialisiert.");
   
-  count();
+  zaehleAnzahlDateien();
   
   //MP3-Decoder initialisieren
   VS1011.begin();
-  VS1011.SetVolume(30, 30);
   
   ladeZuvorAbgespieltenSong();
 }
@@ -79,6 +88,7 @@ void loop() {
   if (paused) return;
   
   waehleDatei();
+  pruefeUndSetzeLautstaerke();
 
   //Datei öffnen und abspielen
   if (!SD.exists(filename)) {
@@ -100,6 +110,7 @@ void loop() {
     while (!paused && SoundFile.available()) {
       SoundFile.read(buffer, sizeof(buffer));
       VS1011.Send32(buffer);
+      pruefeUndSetzeLautstaerke();
       if (checkAndSetButtonPressed()) {
         if (paused && filePosition == 0) {
           filePosition = SoundFile.position();
@@ -147,6 +158,16 @@ boolean checkAndSetButtonPressed() {
   return true;
 }
 
+void pruefeUndSetzeLautstaerke() {
+  if (millis()-lastVolumeEvent<100){
+    return;
+  }
+  int volume = analogRead(volumePin);
+  volume = map(volume, 1023, 0, 100, 0);
+  VS1011.SetVolume(volume, volume);
+  lastVolumeEvent = millis();
+}
+
 // Pausiert den Song oder beendet die Pause,
 // wenn genuegend Zeit zwischen dem letzten Button vergangen ist (mehr als 1 Sekunde)
 // gibt true zurueck falls sich am Pause-Status etwas geaendert hat
@@ -190,7 +211,7 @@ void waehleNaechsteDatei(){
 // Gibt -1 zurueck falls kein Knopf gedrueckt wurde
 int checkButtonPressed() {
   int value = 470;
-  value = analogRead(A5);
+  value = analogRead(buttonsPin);
   if (value > 870) return 10;
   if (value > 700) return 7;
   if (value > 670) return 4;
@@ -212,7 +233,7 @@ void waehleDatei(){
 
 // Zaehlt die Anzahl der Dateien auf der SD Karte und legt die Anzahl im Array ab
 // Annahme: die Dateien sind in 9 Ordner mit Namen 1-9 abgelegt und sind aufsteigend sortiert (01-99.mp3)
-void count() {
+void zaehleAnzahlDateien() {
   int folder = 1;
   int counter = 1;
   char name[13];
