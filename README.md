@@ -2,6 +2,8 @@
 
 Anleitung zum Bau eines Hörbert Klons.
 
+![Hörborn]https://c2.staticflickr.com/8/7666/26997006656_ffd1ef1c14.jpg "Hörborn")
+
 ### What is this repository for? ###
 
 * Quick summary
