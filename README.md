@@ -33,6 +33,11 @@ Für das Gehäuse kann man irgendeine Holzschachtel zweckentfremden, selbst etwa
 * [DWG](https://www.dropbox.com/s/1zb19kptnvq3p6d/h%C3%B6rborn.dwg?dl=0)
 * [DXF](https://www.dropbox.com/s/5j3yvfxwj3fe5jw/h%C3%B6rborn.dxf?dl=0)
 
+![Gehäuse](https://c2.staticflickr.com/8/7185/27698718566_a0f2e3f842_m.jpg "Gehäuse")
+![Gehäuse](https://c2.staticflickr.com/8/7609/27698716386_3e234b8551_m.jpg "Gehäuse")
+![Gehäuse](https://c2.staticflickr.com/8/7515/27698714296_95251ed4b6_m.jpg "Gehäuse")
+![Gehäuse](https://c2.staticflickr.com/8/7398/27122044713_cc75e95ff0_m.jpg "Gehäuse")
+
 ### Wie lötet man alles zusammen? ###
 ![Schema](https://dl.dropbox.com/s/0clr1rj6rry1rwn/hoerbornSchema.png "Schema")
 
