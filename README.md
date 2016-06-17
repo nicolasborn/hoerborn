@@ -6,12 +6,6 @@ Anleitung zum Bau eines Hörbert Klons.
 
 Weitere Bilder sind im [Flickr Album](https://www.flickr.com/gp/born/D94468) zu finden.
 
-### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
-
 ### Welche Teile benoetigt man? ###
 
 Beschreibung                       | Händler        | Link                                                           | Preis pro Stück (ungefähr)
