@@ -8,23 +8,23 @@ Weitere Bilder sind im [Flickr Album](https://www.flickr.com/gp/born/dSp205) zu 
 
 ### Welche Teile benoetigt man? ###
 
-Beschreibung                       | Händler        | Link                                                                     | Preis pro Stück (ungefähr)
+Beschreibung                       | Händler        | Link                                                                     | Preis [CHF]
 :---------                         | :-----         | :-------------------                                                     | -:
-Arduino Uno                        | Aliexpress     | http://s.aliexpress.com/aU3emA32                                         | $3
-Potentiometer 10K                  | Aliexpress     | http://s.aliexpress.com/NV73e6fy                                         | $1
-Drehknopf                          | Aliexpress     | http://s.aliexpress.com/bYNFrqiq                                         | $1.5
-Batteriehalter                     | Aliexpress     | http://s.aliexpress.com/mIraiEBz                                         | $1.5
-Mp3 Shield ASA1                    | ELV            | http://www.elv.ch/audio-shield-fuer-arduino-asa1-bausatz.html            | CHF 20
-11 x 3.3KOhm Widerstand            | Reichelt       | [https://www.reichelt.de/1-4W-5-1-0-k-Ohm-9-1-k-Ohm][reichelt1]          | EUR 0.1
-Kippschalter KS4                   | Reichelt       | [https://www.reichelt.de/Kippschalter/KS-4][reichelt2]                   | EUR 1.5
-Streifenrasterplatine H25PS160     | Reichelt       | [https://www.reichelt.de/Streifenraster/H25PS160][reichelt3]             | EUR 2
-Visaton Breitbandlautsprecher 10cm | Reichelt       | [https://www.reichelt.de/Breitbandlautsprecher/VIS-FR-10HM-8][reichelt4] | EUR 1.6
-11 x Multimec Taster 3FTH9         | Reichelt       | [https://www.reichelt.de/Kurzhubtaster/TASTER-3FTH9][reichelt5]          | EUR 1
-11 x Kappe rund für Taster 3F..    | Reichelt       | [https://www.reichelt.de/Kurzhubtaster/KAPPE-1D06][reichelt6]            | EUR 0.25
-Aufladbare Batterien (z.B eneloop) | Brack          | https://www.brack.ch/panasonic-eneloop-bk-3mcce4be-324491                | CHF 20
-MicroSd Karte (z.B. Kingston 8Gb)  | Brack          | https://www.brack.ch/microsdhc-card-8gb-kingston-88908                   | CHF 6
-Gehäuse                            | roos-design.ch | siehe unten                                                              | CHF 30
-**Total**                          |                |                                                                          | ** ca. CHF 110**
+Arduino Uno                        | Aliexpress     | http://s.aliexpress.com/aU3emA32                                         | 3.00
+Potentiometer 10K                  | Aliexpress     | http://s.aliexpress.com/NV73e6fy                                         | 1.00
+Drehknopf                          | Aliexpress     | http://s.aliexpress.com/bYNFrqiq                                         | 1.50
+Batteriehalter                     | Aliexpress     | http://s.aliexpress.com/mIraiEBz                                         | 1.50
+Mp3 Shield ASA1                    | ELV            | http://www.elv.ch/audio-shield-fuer-arduino-asa1-bausatz.html            | 20.00
+11 x 3.3KOhm Widerstand            | Reichelt       | [https://www.reichelt.de/1-4W-5-1-0-k-Ohm-9-1-k-Ohm][reichelt1]          | 1.00
+Kippschalter KS4                   | Reichelt       | [https://www.reichelt.de/Kippschalter/KS-4][reichelt2]                   | 1.50
+Streifenrasterplatine H25PS160     | Reichelt       | [https://www.reichelt.de/Streifenraster/H25PS160][reichelt3]             | 2.50
+Visaton Breitbandlautsprecher 10cm | Reichelt       | [https://www.reichelt.de/Breitbandlautsprecher/VIS-FR-10HM-8][reichelt4] | 6.00
+11 x Multimec Taster 3FTH9         | Reichelt       | [https://www.reichelt.de/Kurzhubtaster/TASTER-3FTH9][reichelt5]          | 13.00
+11 x Kappe rund für Taster 3F..    | Reichelt       | [https://www.reichelt.de/Kurzhubtaster/KAPPE-1D06][reichelt6]            | 3.50
+Aufladbare Batterien (z.B eneloop) | Brack          | https://www.brack.ch/panasonic-eneloop-bk-3mcce4be-324491                | 20.00
+MicroSd Karte (z.B. Kingston 8Gb)  | Brack          | https://www.brack.ch/microsdhc-card-8gb-kingston-88908                   | 6.00
+Gehäuse                            | roos-design.ch | siehe unten                                                              | 30.00
+**Total**                          |                |                                                                          | ** ca. 110.00**
 
 ### Gehäuse ###
 Für das Gehäuse kann man irgendeine Holzschachtel zweckentfremden, selbst etwas zimmern oder [meine Vorlage](https://www.dropbox.com/s/fan26ac5f0buzio/H%C3%B6rborn.pdf?dl=0)  lasern lassen. Ich hatte es bei [Roos-Design](http://www.roos-design.ch) aus Sperrholz herstellen lassen. Inspiration gibts z.B. auch [auf der offiziellen Hörbert Seite](https://de-de.hoerbert.com/blog/de/design).
