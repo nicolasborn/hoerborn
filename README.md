@@ -24,7 +24,7 @@ Visaton Breitbandlautsprecher 10cm | Reichelt       | https://www.reichelt.de/Br
 Aufladbare Batterien (z.B eneloop) | Brack          | https://www.brack.ch/panasonic-eneloop-bk-3mcce4be-324491      | CHF 20
 MicroSd Karte (z.B. Kingston 8Gb)  | Brack          | https://www.brack.ch/microsdhc-card-8gb-kingston-88908         | CHF 6
 Gehäuse                            | roos-design.ch | siehe unten                                                    | CHF 30
-**Total** | | | **CHF 80**
+**Total** | | | ** ca. CHF 110**
 
 ### Gehäuse ###
 Für das Gehäuse kann man irgendeine Holzschachtel zweckentfremden, selbst etwas zimmern oder [meine Vorlage](https://www.dropbox.com/s/fan26ac5f0buzio/H%C3%B6rborn.pdf?dl=0)  lasern lassen. Ich hatte es bei [Roos-Design](http://www.roos-design.ch) aus Sperrholz herstellen lassen. Inspiration gibts z.B. auch [auf der offiziellen Hörbert Seite](https://de-de.hoerbert.com/blog/de/design).
