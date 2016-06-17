@@ -2,9 +2,9 @@
 
 Anleitung zum Bau eines Hörbert Klons.
 
-![Hörborn](https://c2.staticflickr.com/8/7666/26997006656_ffd1ef1c14.jpg "Hörborn")
+![Hörborn](https://c2.staticflickr.com/8/7358/27122043443_22672eb855.jpg "Hörborn")
 
-Weitere Bilder sind im [Flickr Album](https://www.flickr.com/gp/born/D94468) zu finden.
+Weitere Bilder sind im [Flickr Album](https://www.flickr.com/gp/born/dSp205) zu finden.
 
 ### Welche Teile benoetigt man? ###
 
