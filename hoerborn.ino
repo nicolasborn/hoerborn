@@ -7,12 +7,13 @@
  *
  * @mc       Arduino/RBBB (ATMEGA328)
  * @autor    Nicolas Born / nicolasborn@gmail.com
- * @version  0.1
+ * @version  1.0
  * @created  19.03.2016
- * @updated  19.03.2016
+ * @updated  17.06.2016
  *
  * Versionshistorie:
  * V 0.1:   - Erste Version
+ * V 1.0:   - Erster Release
  **/
 
 #include <SD.h>
@@ -36,7 +37,6 @@ boolean debug = true;
 
 // Variablen fuer Buttonhandling
 int button = -1;
-int previousButtonPressed = -1;
 
 // Variablen bezueglich pausieren von Songs
 boolean paused = false;
@@ -74,12 +74,12 @@ void setup() {
   }
   println("Karte initialisiert.");
   
-  zaehleAnzahlDateien();
+  countNumberOfFiles();
   
   //MP3-Decoder initialisieren
   VS1011.begin();
   
-  ladeZuvorAbgespieltenSong();
+  loadPreviouslyPlayedSong();
 }
 
 void loop() {
@@ -87,8 +87,8 @@ void loop() {
   if (currentFolder==-1) return;
   if (paused) return;
   
-  waehleDatei();
-  pruefeUndSetzeLautstaerke();
+  chooseFile();
+  checkAndSetVolume();
 
   //Datei öffnen und abspielen
   if (!SD.exists(filename)) {
@@ -110,11 +110,11 @@ void loop() {
     while (!paused && SoundFile.available()) {
       SoundFile.read(buffer, sizeof(buffer));
       VS1011.Send32(buffer);
-      pruefeUndSetzeLautstaerke();
+      checkAndSetVolume();
       if (checkAndSetButtonPressed()) {
         if (paused && filePosition == 0) {
           filePosition = SoundFile.position();
-          speichereLiedUndPositionInEeprom(filePosition);
+          saveSongAndPositionInEeprom(filePosition);
           println("Pausiert an Position " + String(filePosition));
         }
         VS1011.Send2048Zeros();
@@ -123,7 +123,7 @@ void loop() {
         return;
       }
       if (millis()-lastEepromEvent>60000){
-        speichereLiedUndPositionInEeprom(SoundFile.position());
+        saveSongAndPositionInEeprom(SoundFile.position());
       }
     }
 
@@ -131,7 +131,7 @@ void loop() {
     VS1011.SetMute();
     SoundFile.close();
 
-    waehleNaechsteDatei();
+    chooseNextFile();
   }
 }
 
@@ -148,17 +148,16 @@ boolean checkAndSetButtonPressed() {
   if (newButtonPressed > 9){
     return nextPreviousSong(newButtonPressed);
   }
-  previousButtonPressed = newButtonPressed;
   button = newButtonPressed;
   currentFolder = newButtonPressed;
   currentFile = 1;
   filePosition = 0;
   lastButtonEvent = millis();
-  speichereLiedUndPositionInEeprom(0);
+  saveSongAndPositionInEeprom(0);
   return true;
 }
 
-void pruefeUndSetzeLautstaerke() {
+void checkAndSetVolume() {
   if (millis()-lastVolumeEvent<100){
     return;
   }
@@ -186,14 +185,14 @@ boolean nextPreviousSong(int newButtonPressed){
     return false;
   }
   if (newButtonPressed == 11){
-    waehleNaechsteDatei();
+    chooseNextFile();
   }
   filePosition = 0;
   lastButtonEvent = millis();
   return true;
 }
 
-void waehleNaechsteDatei(){
+void chooseNextFile(){
   currentFile++;
   // Pruefe ob Datei existiert, ansonsten wird die naechste gespeichert.
   while (true){
@@ -204,7 +203,7 @@ void waehleNaechsteDatei(){
     currentFile = 1;
     button = currentFolder;
   }
-  speichereLiedUndPositionInEeprom(0);
+  saveSongAndPositionInEeprom(0);
 }
 
 // Prueft welcher Knopf gedrueckt wurde
@@ -227,13 +226,13 @@ int checkButtonPressed() {
   return -1;
 }
 
-void waehleDatei(){
+void chooseFile(){
   sprintf(filename, "%d/%02d.mp3", currentFolder, currentFile);
 }  
 
 // Zaehlt die Anzahl der Dateien auf der SD Karte und legt die Anzahl im Array ab
 // Annahme: die Dateien sind in 9 Ordner mit Namen 1-9 abgelegt und sind aufsteigend sortiert (01-99.mp3)
-void zaehleAnzahlDateien() {
+void countNumberOfFiles() {
   int folder = 1;
   int counter = 1;
   char name[13];
@@ -250,7 +249,7 @@ void zaehleAnzahlDateien() {
   }
 }
 
-void ladeZuvorAbgespieltenSong(){
+void loadPreviouslyPlayedSong(){
   int folderFromEeprom = EEPROM.read(0);
   int fileFromEeprom = EEPROM.read(1);
   
@@ -262,7 +261,7 @@ void ladeZuvorAbgespieltenSong(){
   filePosition = EEPROMReadLong(2);
 }
 
-void speichereLiedUndPositionInEeprom(long filePosition){
+void saveSongAndPositionInEeprom(long filePosition){
   if (filePosition==0){
     EEPROM.write(0, currentFolder);
     EEPROM.write(1, currentFile);
