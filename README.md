@@ -17,10 +17,10 @@ Batteriehalter                     | Aliexpress     | http://s.aliexpress.com/mI
 Mp3 Shield ASA1                    | ELV            | http://www.elv.ch/audio-shield-fuer-arduino-asa1-bausatz.html            | CHF 20
 11 x 3.3KOhm Widerstand            | Reichelt       | [https://www.reichelt.de/1-4W-5-1-0-k-Ohm-9-1-k-Ohm][reichelt1]          | EUR 0.1
 Kippschalter KS4                   | Reichelt       | [https://www.reichelt.de/Kippschalter/KS-4][reichelt2]                   | EUR 1.5
-Streifenrasterplatine H25PS160     | Reichelt       | [https://www.reichelt.de/Streifenraster/H25PS160][reichelt4]             | EUR 2
-Visaton Breitbandlautsprecher 10cm | Reichelt       | [https://www.reichelt.de/Breitbandlautsprecher/VIS-FR-10HM-8][reichelt5] | EUR 1.6
-11 x Multimec Taster 3FTH9         | Reichelt       | [https://www.reichelt.de/Kurzhubtaster/TASTER-3FTH9]|reichelt6]          | EUR 1
-11 x Kappe rund für Taster 3F..    | Reichelt       | [https://www.reichelt.de/Kurzhubtaster/KAPPE-1D06][reichelt7]            | EUR 0.25
+Streifenrasterplatine H25PS160     | Reichelt       | [https://www.reichelt.de/Streifenraster/H25PS160][reichelt3]             | EUR 2
+Visaton Breitbandlautsprecher 10cm | Reichelt       | [https://www.reichelt.de/Breitbandlautsprecher/VIS-FR-10HM-8][reichelt4] | EUR 1.6
+11 x Multimec Taster 3FTH9         | Reichelt       | [https://www.reichelt.de/Kurzhubtaster/TASTER-3FTH9][reichelt5]          | EUR 1
+11 x Kappe rund für Taster 3F..    | Reichelt       | [https://www.reichelt.de/Kurzhubtaster/KAPPE-1D06][reichelt6]            | EUR 0.25
 Aufladbare Batterien (z.B eneloop) | Brack          | https://www.brack.ch/panasonic-eneloop-bk-3mcce4be-324491                | CHF 20
 MicroSd Karte (z.B. Kingston 8Gb)  | Brack          | https://www.brack.ch/microsdhc-card-8gb-kingston-88908                   | CHF 6
 Gehäuse                            | roos-design.ch | siehe unten                                                              | CHF 30
